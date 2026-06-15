@@ -1,230 +1,370 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="dark" data-accent="blue-led" data-density="airy" data-hero-stats="authority">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>FlySpaceA — Historical Backfill Status</title>
-<style>
-  :root {
-    color-scheme: dark;
-    --bg: oklch(0.17 0.02 260);
-    --panel: oklch(0.22 0.025 260);
-    --panel2: oklch(0.26 0.03 260);
-    --line: oklch(0.32 0.03 260);
-    --fg: oklch(0.95 0.01 260);
-    --muted: oklch(0.7 0.02 260);
-    --accent: oklch(0.72 0.15 230);
-    --ok: oklch(0.74 0.16 150);
-    --warn: oklch(0.8 0.16 85);
-    --bad: oklch(0.68 0.2 25);
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    background: radial-gradient(120% 100% at 50% 0%, oklch(0.2 0.03 260), var(--bg));
-    color: var(--fg);
-    min-height: 100vh;
-  }
-  main { max-width: 880px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.5rem); }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem; margin-bottom: 1.5rem; }
-  header h1 { font-size: clamp(1.3rem, 4vw, 1.9rem); margin: 0; letter-spacing: -.02em; }
-  header .sub { color: var(--muted); font-size: .95rem; }
+    <title>FlySpaceA — Community Impact Report · Q2 2026</title>
+    <meta name="description" content="FlySpaceA Community Impact Report, Q2 2026: 3,500+ Space-A flights surfaced, 271 flight locations, 99.99% alert delivery, and a growing community of military travelers.">
 
-  .badge { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 600;
-           padding: .25rem .6rem; border-radius: 999px; border: 1px solid var(--line); }
-  .badge .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--muted); }
-  .badge.live { color: var(--ok); border-color: color-mix(in oklch, var(--ok) 40%, transparent); }
-  .badge.live .dot { background: var(--ok); box-shadow: 0 0 0 0 color-mix(in oklch, var(--ok) 70%, transparent);
-                     animation: pulse 2s infinite; }
-  .badge.idle { color: var(--muted); }
-  .badge.done { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 40%, transparent); }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--ok) 60%, transparent); }
-                     70% { box-shadow: 0 0 0 .5rem transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+    <meta property="og:title" content="FlySpaceA — Community Impact Report · Q2 2026">
+    <meta property="og:description" content="How FlySpaceA helps the military community fly the Space-A benefit they've earned — verified figures from the last 90 days.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://vonterraproject.org/flyspacea-impact-2026">
+    <meta property="og:image" content="https://vonterraproject.org/images/logo.png">
 
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 1rem;
-           padding: clamp(1rem, 3vw, 1.5rem); margin-bottom: 1.25rem; }
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="/images/logo.png">
+    <link rel="apple-touch-icon" href="/images/logo.png">
 
-  .progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
-  .pct { font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 700; line-height: 1; letter-spacing: -.03em; }
-  .pct small { font-size: .4em; font-weight: 600; color: var(--muted); margin-left: .15em; }
-  .meta { color: var(--muted); text-align: right; }
-  .meta b { color: var(--fg); }
-  .bar { height: .75rem; border-radius: 999px; background: var(--panel2); overflow: hidden; margin-top: 1rem; }
-  .bar > i { display: block; height: 100%; border-radius: inherit;
-             background: linear-gradient(90deg, var(--accent), oklch(0.78 0.15 180));
-             transition: width .6s ease; }
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Saira+Stencil+One&display=swap" rel="stylesheet">
 
-  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem; }
-  .stat .n { font-size: clamp(1.4rem, 5vw, 1.9rem); font-weight: 700; letter-spacing: -.02em; }
-  .stat .l { color: var(--muted); font-size: .82rem; margin-top: .2rem; }
-  .stat .x { color: var(--ok); font-size: .8rem; font-weight: 600; margin-top: .35rem; }
-
-  h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
-       margin: 0 0 .9rem; font-weight: 700; }
-
-  .gemini { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
-  .gemini .row { display: flex; justify-content: space-between; padding: .4rem 0; border-bottom: 1px solid var(--line); }
-  .gemini .row:last-child { border-bottom: 0; }
-  .gemini .k { color: var(--muted); }
-  .gemini .total { font-size: 1.5rem; font-weight: 700; }
-  .note { color: var(--muted); font-size: .78rem; margin-top: .8rem; }
-
-  .runs { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .runs .r { width: 1.5rem; height: 1.5rem; border-radius: .4rem; background: var(--ok);
-             display: grid; place-items: center; font-size: .7rem; }
-  .runs .r.failed { background: var(--bad); }
-  .runs .r.running { background: var(--warn); animation: pulse 2s infinite; }
-  .runs-legend { color: var(--muted); font-size: .8rem; margin-top: .7rem; display: flex; gap: 1rem; flex-wrap: wrap; }
-
-  footer { color: var(--muted); font-size: .78rem; text-align: center; margin-top: 2rem; line-height: 1.7; }
-  a { color: var(--accent); }
-  #err { display: none; background: color-mix(in oklch, var(--bad) 18%, var(--panel));
-         border-color: color-mix(in oklch, var(--bad) 45%, transparent); }
-  @media (max-width: 520px) { .gemini { grid-template-columns: 1fr; } .meta { text-align: left; } }
-</style>
-</head>
+    <link rel="preload" as="style" href="/build/assets/report-community-impact-dpSc_Xqw.css" /><link rel="modulepreload" as="script" href="/build/assets/report-community-impact-CXzjHGhQ.js" /><link rel="stylesheet" href="/build/assets/report-community-impact-dpSc_Xqw.css" /><script type="module" src="/build/assets/report-community-impact-CXzjHGhQ.js"></script></head>
 <body>
-<main>
-  <header>
-    <h1>FlySpaceA · Historical Backfill</h1>
-    <span id="state" class="badge idle"><span class="dot"></span><span id="state-txt">loading…</span></span>
-    <span class="sub" id="updated"></span>
+
+<div class="class-strip">
+  <span><strong>COMMUNITY IMPACT REPORT</strong></span>
+  <span>VERIFIED FIGURES ONLY</span>
+  <span>DATA SNAPSHOT: 12 JUN 2026</span>
+</div>
+
+<div class="container">
+  <header class="masthead">
+    <div class="masthead-brand">
+      <img src="/images/logo.png" alt="FlySpaceA emblem">
+      <span class="masthead-wordmark">FLYSPACEA</span>
+    </div>
+    <div class="masthead-tag">
+      <b>Community Impact Report</b><br><br>
+      Q2 2026 · Trailing 90 Days
+      <span class="masthead-sponsor">Sponsored by <a href="https://vonterraproject.org" target="_blank" rel="noopener">Von Terra Project</a></span>
+    </div>
   </header>
+</div>
 
-  <div class="panel" id="err">⚠ Couldn’t load <code>status.json</code>. Showing nothing yet — it may not be published, or your network blocked it.</div>
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="container">
+    <p class="kicker">The Space-A Experts <span class="tick">//</span> Community Impact Report</p>
+    <h1 class="reveal in">We Help the Military Community <em>Fly the Benefit They've Earned.</em></h1>
+    <p class="hero-sub reveal in">Space-A travel offers free seats on military aircraft to service members,
+      retirees, veterans, and their families. We watch official AMC terminal schedules around the clock and
+      tell you the moment a seat shows up. So the benefit actually gets used.</p>
+    <div class="stat-band" id="hero-stats"></div>
+  </div>
+</section>
 
-  <section class="panel">
-    <div class="progress-head">
-      <div class="pct"><span id="pct">—</span><small>%</small></div>
-      <div class="meta">
-        <div><b id="done">—</b> of <b id="total">—</b> schedule dates</div>
-        <div><b id="remaining">—</b> remaining · ETA <b id="eta">—</b></div>
+<!-- ============================ COMMUNITY ============================ -->
+<section class="block tinted" id="community">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">01 / The Community We Serve</p>
+      <h2>11.5 Million Americans Have Earned This Benefit. Almost None Get to Use It.</h2>
+      <p>Space-A has rewarded service for more than 75 years. But the information you need to use it has
+        always been scattered, stale, and hard to trust. In a typical year, only about 1% of eligible
+        travelers manage to fly. Closing that gap is why FlySpaceA exists.</p>
+    </div>
+    <div class="gap-visual reveal">
+      <div class="gap-bar"><span class="gap-sliver"></span></div>
+      <div class="gap-labels">
+        <span><b>11.5M</b> &nbsp;eligible service members, retirees, veterans &amp; families</span>
+        <span class="gap-hl"><b>~1%</b> &nbsp;fly in a typical year</span>
       </div>
     </div>
-    <div class="bar"><i id="barfill" style="width:0%"></i></div>
-  </section>
-
-  <section class="panel">
-    <h2>Data loaded</h2>
-    <div class="grid">
-      <div class="stat"><div class="n" id="s-backfill">—</div><div class="l">flights loaded by backfill</div></div>
-      <div class="stat"><div class="n" id="s-archived">—</div><div class="l">archived flights (total)</div><div class="x" id="s-archived-x"></div></div>
-      <div class="stat"><div class="n" id="s-live">—</div><div class="l">live flights</div></div>
-      <div class="stat"><div class="n" id="s-airports">—</div><div class="l">airports</div><div class="x" id="s-airports-x"></div></div>
-      <div class="stat"><div class="n" id="s-pending">—</div><div class="l">airports pending review</div></div>
+    <div class="seg-rows">
+      <div class="seg-row reveal"><span class="seg-label">Retirees &amp; their families</span><div class="lane-track"><div class="lane-bar seg-bar" style="width: 100%;"></div></div><span class="seg-val">4.95M</span></div>
+      <div class="seg-row reveal"><span class="seg-label">Active component &amp; families</span><div class="lane-track"><div class="lane-bar seg-bar" style="width: 56.8%;"></div></div><span class="seg-val">2.81M</span></div>
+      <div class="seg-row reveal"><span class="seg-label">100% disabled veterans &amp; families</span><div class="lane-track"><div class="lane-bar seg-bar" style="width: 42.4%;"></div></div><span class="seg-val">2.10M</span></div>
+      <div class="seg-row reveal"><span class="seg-label">Guard &amp; Reserve families</span><div class="lane-track"><div class="lane-bar seg-bar" style="width: 32.9%;"></div></div><span class="seg-val">1.63M</span></div>
+      <div class="seg-row reveal"><span class="seg-label">Survivors &amp; others</span><div class="lane-track"><div class="lane-bar seg-bar" style="width: 18.6%;"></div></div><span class="seg-val">0.92M</span></div>
     </div>
-  </section>
+    <p class="footnote">ELIGIBILITY SEGMENTS INCLUDE SPONSORS AND DEPENDENTS · SOURCE: FLYSPACEA MARKET
+      RESEARCH, 2026 · TYPICAL-YEAR PARTICIPATION ≈100K–194K TRAVELERS</p>
+  </div>
+</section>
 
-  <section class="panel">
-    <h2>Gemini usage</h2>
-    <div class="gemini">
-      <div>
-        <div class="row"><span class="k">Flash — calls</span><span id="g-flash-calls">—</span></div>
-        <div class="row"><span class="k">Flash — cost</span><span id="g-flash-cost">—</span></div>
-        <div class="row"><span class="k">Pro — calls</span><span id="g-pro-calls">—</span></div>
-        <div class="row"><span class="k">Pro — cost</span><span id="g-pro-cost">—</span></div>
+<!-- ============================ MAP ============================ -->
+<section class="block" id="network">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">02 / Wherever Space-A Flies</p>
+      <h2>From the East Coast to the Indo-Pacific, We Help Travelers Find the Way.</h2>
+      <p>Space-A moves across the globe every day. FlySpaceA maps where the flights actually go:
+        <strong>55 departure points</strong> and <strong>271 flight locations</strong>, from the U.S. East
+        Coast to Europe and the Indo-Pacific. That picture lives in your pocket, free.</p>
+    </div>
+    <div class="map-frame reveal" id="map-reveal">
+      <div id="network-map"></div>
+      <span class="map-corner tl">FSA / GLOBAL COVERAGE · LAST 90 DAYS</span>
+      <span class="map-corner br">271 FLIGHT LOCATIONS · MAJOR TERMINALS SHOWN · LANE WEIGHT = VOLUME</span>
+    </div>
+    <div class="region-legend" id="region-legend"></div>
+    <p class="region-note">DEPARTURES BY COMBATANT-COMMAND REGION, LAST 90 DAYS · DOTS MARK MAJOR TERMINALS AMONG THE 271 FLIGHT LOCATIONS IN OUR NETWORK · PLUS AFRICOM &amp; SOUTHCOM CONNECTIONS</p>
+  </div>
+</section>
+
+<!-- ============================ LANES ============================ -->
+<section class="block tinted" id="lanes">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">03 / Top Corridors</p>
+      <h2>Where Space-A Actually Flies.</h2>
+      <p>Some routes run almost daily. Others appear once a season. Over the last 90 days,
+        these were the most active corridors our travelers followed.</p>
+    </div>
+    <div class="lanes-grid" id="lane-bars"></div>
+  </div>
+</section>
+
+<!-- ============================ TRUST ============================ -->
+<section class="block" id="trust">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">04 / Alerts That Arrive</p>
+      <h2>An Alert Is Only Worth Anything if It Arrives.</h2>
+      <p>Our notification system has delivered <strong>18,873 flight alerts</strong> with a
+        <strong>99.99% success rate</strong> (effectively zero bounces). And because the pipeline refreshes
+        terminal schedules every few hours, the flights you see are current, not yesterday's news.</p>
+    </div>
+    <div class="trust-grid">
+      <div class="reveal" id="donut"></div>
+      <div class="reveal">
+        <div class="trust-rows">
+          <div class="trust-row">
+            <span class="t-label">Flight alerts delivered successfully</span>
+            <span class="t-val good">18,871 of 18,873</span>
+          </div>
+          <div class="trust-row">
+            <span class="t-label">Transient bounces — ever</span>
+            <span class="t-val">2</span>
+          </div>
+          <div class="trust-row">
+            <span class="t-label">Terminal schedules re-checked</span>
+            <span class="t-val">Multiple times daily</span>
+          </div>
+        </div>
+        <div class="badge-row">
+          <span class="pill"><b>72-HR</b> confirmed schedules</span>
+          <span class="pill"><b>30-DAY</b> projected schedules</span>
+          <span class="pill">Travelers always know how firm a flight is</span>
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-end">
-        <div class="k" style="color:var(--muted)">total est. cost</div>
-        <div class="total" id="g-total">—</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ MOMENTUM ============================ -->
+<section class="block tinted" id="momentum">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">05 / Momentum</p>
+      <h2>Military Travelers Are Finding FlySpaceA.</h2>
+      <p>In seven months, the audience has grown from a few hundred to a community of thousands
+        across the app and social channels.</p>
+    </div>
+    <div class="growth-grid">
+      <div class="growth-wrap reveal" id="growth-chart"></div>
+      <div class="side-stats reveal">
+        <div class="side-stat">
+          <div class="s-v">6,300+</div>
+          <div class="s-k">registered travelers (≈480 added in the trailing week)</div>
+        </div>
+        <div class="side-stat">
+          <div class="s-v">15,263</div>
+          <div class="s-k">Instagram followers, up from 152 at launch</div>
+        </div>
+        <div class="side-stat">
+          <div class="s-v">1,828</div>
+          <div class="s-k">Facebook followers</div>
+        </div>
+        <div class="side-stat">
+          <div class="s-v">902</div>
+          <div class="s-k">active Android devices, near-zero uninstalls</div>
+        </div>
       </div>
     </div>
-    <div class="note" id="g-note"></div>
-  </section>
+    <p class="footnote">INSTAGRAM FOLLOWING THROUGH LATE MAY 2026. SOCIAL LINES END AT THE LAST VERIFIED
+      DATA POINT (22 MAY). MAY DIP IN THE TRAVELERS LINE: ROUTINE REMOVAL OF NEVER-VERIFIED ACCOUNTS.
+      DATABASE HYGIENE, NOT CHURN.</p>
+  </div>
+</section>
 
-  <section class="panel">
-    <h2>Recent pipeline runs</h2>
-    <div class="runs" id="runs"></div>
-    <div class="runs-legend">
-      <span>◼ <span style="color:var(--ok)">ok</span></span>
-      <span>◼ <span style="color:var(--warn)">running</span></span>
-      <span>◼ <span style="color:var(--bad)">failed (auto-retried)</span></span>
+<!-- ============================ ENGINE ============================ -->
+<section class="block" id="engine">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">06 / The Engine Behind The Data</p>
+      <h2>Real Engineering, in Service of Travelers.</h2>
+      <p>Behind every flight you see is a seven-step, AI-assisted data pipeline. We receive official
+        terminal schedules, extract the flights, enrich them with airport and route data, clean and
+        de-duplicate, load them, reconcile against what's already live, and archive the history.
+        It runs continuously, so the picture stays current without anyone refreshing a PDF.</p>
     </div>
-  </section>
+    <div class="pipeline reveal">
+      <div class="pipe-step"><span class="pipe-no">01</span><div class="pipe-label">Receive</div></div>
+      <div class="pipe-step"><span class="pipe-no">02</span><div class="pipe-label">Extract</div></div>
+      <div class="pipe-step"><span class="pipe-no">03</span><div class="pipe-label">Enrich</div></div>
+      <div class="pipe-step"><span class="pipe-no">04</span><div class="pipe-label">Clean</div></div>
+      <div class="pipe-step"><span class="pipe-no">05</span><div class="pipe-label">Load</div></div>
+      <div class="pipe-step"><span class="pipe-no">06</span><div class="pipe-label">Reconcile</div></div>
+      <div class="pipe-step"><span class="pipe-no">07</span><div class="pipe-label">Archive</div></div>
+    </div>
+    <div class="engine-stats">
+      <div class="engine-stat reveal"><div class="s-v count" data-n="403" data-dec="0" data-suffix="">403</div><div class="s-k">pipeline runs in the tracked window</div></div>
+      <div class="engine-stat reveal"><div class="s-v count" data-n="271" data-dec="0" data-suffix="">271</div><div class="s-k">flight locations in our network</div></div>
+      <div class="engine-stat reveal"><div class="s-v count" data-n="184" data-dec="0" data-suffix="">184</div><div class="s-k">destinations reached in the last 90 days</div></div>
+      <div class="engine-stat reveal"><div class="s-v">40–55</div><div class="s-k">destinations surfaced every single week</div></div>
+    </div>
+  </div>
+</section>
 
-  <footer>
-    Auto-updated from the flight-data pipeline · figures are aggregate and sanitized · not real-time.<br>
-    Historical Space-A schedules are loaded SQL-only and remain invisible in the app by design.
+<!-- ============================ RESPECT ============================ -->
+<section class="block tinted" id="respect">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">07 / Respect, By Design</p>
+      <h2>Some Things We Will Never Show.</h2>
+      <p>FlySpaceA is built by people who served. That shapes what the tool does, and what it refuses to do.</p>
+    </div>
+    <div class="respect-grid">
+      <div class="respect-card reveal">
+        <p class="r-k">OPSEC</p>
+        <h3>No CENTCOM Flights.</h3>
+        <p>Unlike others, we don't display CENTCOM flights. Out of respect for our service members, that
+          region stays off every map and feed we publish. <strong>If you see CENTCOM Space-A flights posted
+          anywhere, it's wrong.</strong></p>
+      </div>
+      <div class="respect-card reveal" style="transition-delay: 90ms;">
+        <p class="r-k">Privacy</p>
+        <h3>The Minimum Data, Nothing More.</h3>
+        <p>We keep as little information as possible and treat data compliance as a standing commitment.
+          Deletion requests are honored, every time.</p>
+      </div>
+      <div class="respect-card reveal" style="transition-delay: 180ms;">
+        <p class="r-k">Discipline</p>
+        <h3>No Tail Numbers. Ever.</h3>
+        <p>We never store or display tail numbers or aircraft identifiers. They're not in our database,
+          so they can't leak from it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ MISSION ============================ -->
+<section class="block" id="mission">
+  <div class="container">
+    <div class="mission-grid">
+      <div class="mission-copy">
+        <div class="sec-head reveal" style="margin-bottom: 1.5rem;">
+          <p class="sec-no">08 / Why We Build</p>
+          <h2>Built for the People Who Serve.</h2>
+        </div>
+        <p class="reveal">FlySpaceA is independent and <strong>disabled-veteran-owned</strong>. We built it
+          out of pocket, with <strong>modern AI tooling</strong>, for one community: the service members,
+          retirees, veterans, and families who fly Space-A.</p>
+        <p class="reveal">We work closely with the <strong>Von Terra Project</strong>, a veteran-serving
+          nonprofit, to put this capability in front of the people who earned it.</p>
+        <p class="reveal">Our dream is simple: <strong>this tool in the hands of Air Mobility Command</strong>,
+          and every service member who can use a free flight home.</p>
+        <div class="mission-chips reveal">
+          <span class="pill"><b>Independent</b></span>
+          <span class="pill"><b>AI-powered</b></span>
+          <span class="pill"><b>Veteran-focused</b></span>
+        </div>
+      </div>
+      <div class="partner-card reveal">
+        <span class="p-k">Nonprofit Partner · Sponsor</span>
+        <img src="/images/von-terra-project-logo.png" alt="Von Terra Project logo" class="partner-logo">
+        <span class="p-name">Von Terra Project</span>
+        <span class="p-sub">Serving the veteran community, together.</span>
+        <a class="p-link" href="https://vonterraproject.org" target="_blank" rel="noopener">vonterraproject.org</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WAY FORWARD ============================ -->
+<section class="block tinted" id="forward">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="sec-no">09 / The Way Forward</p>
+      <h2>What Comes Next.</h2>
+      <p>We have a clear plan, and it keeps the community first at every step.</p>
+    </div>
+    <ol class="forward-list">
+      <li class="forward-step reveal">
+        <span class="fs-no">01</span>
+        <div class="fs-body">
+          <h3>Keep the Core Free.</h3>
+          <p>The features travelers rely on today stay free. Flight tracking and alerts are the benefit,
+            and the benefit belongs to the people who earned it.</p>
+        </div>
+      </li>
+      <li class="forward-step reveal" style="transition-delay: 90ms;">
+        <span class="fs-no">02</span>
+        <div class="fs-body">
+          <h3>Launch CCaaS With Google Cloud.</h3>
+          <p>We're standing up a Contact Center as a Service built on Google Cloud: calls, texts, and chat
+            in one place, backed by grounded AI that answers from real Space-A knowledge, not guesses.
+            Travelers get accurate help the moment they need it, on whatever channel they're already using.</p>
+          <div class="fs-chips">
+            <span class="pill"><b>Voice</b> calls</span>
+            <span class="pill"><b>SMS</b> &amp; text</span>
+            <span class="pill"><b>Chat</b> &amp; messaging</span>
+            <span class="pill"><b>Grounded</b> AI answers</span>
+            <span class="pill">Human handoff</span>
+          </div>
+        </div>
+      </li>
+      <li class="forward-step reveal" style="transition-delay: 180ms;">
+        <span class="fs-no">03</span>
+        <div class="fs-body">
+          <h3>Get This Into Air Mobility Command.</h3>
+          <p>The biggest goal: deliver this product to Air Mobility Command directly, so the right people
+            have it. This started as a tool for the community. It should serve the people who run the system too.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ CTA ============================ -->
+<section class="cta">
+  <div class="container">
+    <p class="kicker" style="text-align:center;">10 / Start Here</p>
+    <h2 class="reveal">Nobody Serves the Space-A Community Like FlySpaceA.</h2>
+    <p class="lede reveal">Thousands of flights surfaced. Hundreds of locations. Alerts that actually arrive.
+      It's free, and it's for the people who earned it. Whether you're flying home, flying out, or helping
+      someone who is, start with FlySpaceA.</p>
+    <div class="reveal">
+      <a class="btn-primary" href="https://flyspacea.com">Track flights free</a>
+      <div class="store-badges">
+        <a href="https://apps.apple.com/app/id6761509292" target="_blank" rel="noopener">
+          <img src="/images/app-store-badge.svg" alt="Download on the App Store" class="badge-apple">
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.flyspacea.mobile" target="_blank" rel="noopener">
+          <img src="/images/google-play-badge.png" alt="Get it on Google Play" class="badge-play">
+        </a>
+      </div>
+    </div>
+    <p class="disclaimer">FlySpaceA aggregates publicly available USAF AMC schedule data. It is not
+      affiliated with, endorsed by, or sponsored by the U.S. Government or the Department of Defense.
+      Flight data is provided as-is; always confirm with the terminal.</p>
+  </div>
+</section>
+
+<div class="container">
+  <footer class="colophon">
+    <span>FLYSPACEA · COMMUNITY IMPACT REPORT · Q2 2026</span>
+    <span>DATA BASIS: PRODUCTION SNAPSHOT 12 JUN 2026 · SOCIAL/APP SNAPSHOT 09 JUN 2026 (FOLLOWERS VERIFIED 22 MAY 2026)</span>
+    <span>ELIGIBILITY ESTIMATES: FLYSPACEA MARKET RESEARCH, 2026 · ONLY VERIFIED FIGURES ARE SHOWN. NO TAIL NUMBERS ARE STORED OR DISPLAYED.</span>
+    <span>© 2026 MEDIOCRIST LLC · NOT AN OFFICIAL U.S. GOVERNMENT SYSTEM</span>
+    <span>CONTRIBUTOR &amp; SPONSOR: VON TERRA PROJECT, A 501(C)(3) NONPROFIT · <a href="https://vonterraproject.org" target="_blank" rel="noopener">VONTERRAPROJECT.ORG</a></span>
   </footer>
-</main>
+</div>
 
-<script>
-const $ = id => document.getElementById(id);
-const fmt = n => (n == null ? "—" : Number(n).toLocaleString());
-const usd = n => (n == null ? "—" : "$" + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-
-function ago(iso) {
-  if (!iso) return "—";
-  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
-  if (s < 60) return Math.floor(s) + "s ago";
-  if (s < 3600) return Math.floor(s / 60) + "m ago";
-  if (s < 86400) return Math.floor(s / 3600) + "h ago";
-  return Math.floor(s / 86400) + "d ago";
-}
-
-function setState(d) {
-  const b = $("state"), t = $("state-txt");
-  b.className = "badge " + (d.complete ? "done" : d.active ? "live" : "idle");
-  t.textContent = d.complete ? "complete" : d.active ? "running" : "idle";
-}
-
-function render(d) {
-  $("err").style.display = "none";
-  setState(d);
-  $("updated").textContent = "updated " + ago(d.updated_at);
-
-  const p = d.progress || {};
-  $("pct").textContent = p.percent ?? "—";
-  $("barfill").style.width = (p.percent ?? 0) + "%";
-  $("done").textContent = fmt(p.dates_done);
-  $("total").textContent = fmt(p.dates_total);
-  $("remaining").textContent = fmt(p.dates_remaining);
-  $("eta").textContent = d.complete ? "done" : (d.eta_hours != null ? "~" + d.eta_hours + "h" : "—");
-
-  const s = d.stats || {}, a = d.added || {};
-  $("s-backfill").textContent = fmt(a.flights_by_backfill);
-  $("s-archived").textContent = fmt(s.archived_flights);
-  $("s-archived-x").textContent = a.archived_since_tracking ? "+" + fmt(a.archived_since_tracking) + " since tracking" : "";
-  $("s-live").textContent = fmt(s.flights);
-  $("s-airports").textContent = fmt(s.airports);
-  $("s-airports-x").textContent = a.airports_since_tracking ? "+" + fmt(a.airports_since_tracking) + " new" : "";
-  $("s-pending").textContent = fmt(s.pending_review);
-
-  const g = d.gemini || {}, f = g.flash || {}, pr = g.pro || {};
-  $("g-flash-calls").textContent = fmt(f.calls);
-  $("g-flash-cost").textContent = usd(f.cost_usd);
-  $("g-pro-calls").textContent = fmt(pr.calls);
-  $("g-pro-cost").textContent = usd(pr.cost_usd);
-  $("g-total").textContent = usd(g.total_cost_usd);
-  $("g-note").textContent = g.since
-    ? "Pipeline Gemini usage since " + g.since.slice(0, 10) + " — includes the scheduled 6-hourly runs. Cost computed from token counts."
-    : "";
-
-  const wrap = $("runs"); wrap.innerHTML = "";
-  (d.recent_runs || []).forEach(r => {
-    const el = document.createElement("div");
-    el.className = "r " + r.status;
-    el.title = (r.status) + (r.at ? " · " + new Date(r.at).toLocaleString() : "");
-    el.textContent = r.status === "ok" ? "✓" : r.status === "failed" ? "✕" : "…";
-    wrap.appendChild(el);
-  });
-}
-
-async function tick() {
-  try {
-    const r = await fetch("https://flyspacea-com.github.io/flyspacea-backfill-status/status.json?t=" + Date.now(), {cache: "no-store"});
-    if (!r.ok) throw new Error(r.status);
-    render(await r.json());
-  } catch (e) {
-    $("err").style.display = "block";
-  }
-}
-tick();
-setInterval(tick, 60000);
-</script>
 </body>
 </html>
