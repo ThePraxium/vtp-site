@@ -1,0 +1,15 @@
+# vtp_site is the PUBLIC repo (vonterraproject.org) — never commit secrets,
+# environment files, build output, or anything pulled from the Google Drive.
+.env
+.env.*
+*.key
+*.pem
+secrets*
+node_modules/
+dist/
+build/
+.cache/
+.DS_Store
+*.log
+# never commit Drive-derived content into the public site repo
+workspace/
