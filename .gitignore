@@ -13,3 +13,12 @@ build/
 *.log
 # never commit Drive-derived content into the public site repo
 workspace/
+
+# --- Claude Code control structure: ALWAYS pullable (never ignore .claude/) ---
+# .claude/ carries VTP command structure & workflows; the site skill (SKILL.md) must
+# survive a clone on any machine so the system can be operated anywhere. Keep it tracked.
+# PUBLIC repo: the settings.local.json carve-out below is load-bearing — it keeps any
+# machine-local secrets/paths OUT of git even though .claude/ itself is tracked.
+!.claude/
+!.claude/**
+.claude/settings.local.json
